@@ -3,7 +3,7 @@ from utils.order_util import OrderUtil
 from utils.time_util import TimeUtil
 
 
-API_KEY = "req_3ZPrqqnZuuNDyPTf7DTcWGGo"
+API_KEY = ""
 RUN_SLEEP_TIME = 60
 
 
