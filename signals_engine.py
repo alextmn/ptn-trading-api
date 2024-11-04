@@ -10,6 +10,7 @@ from utils.logger_util import LoggerUtil
 from utils.order_util import OrderUtil
 from utils.time_util import TimeUtil
 import threading
+import logging
 
 API_KEY = "req_3ZPrqqnZuuNDyPTf7DTcWGGo"
 URL = os.environ.get("MINER_POSITIONS_ENDPOINT_URL", "https://request.wildsage.io/miner-positions?tier=0")
@@ -28,11 +29,11 @@ def get_new_orders():
 
 	# Check if the request was successful (status code 200)
 	if response.status_code == 200:
-		print("GET request was successful.")
+		logging.info("GET request was successful.")
 		return response.json()
 	else:
-		print(response.__dict__)
-		print("GET request failed with status code: " + str(response.status_code))
+		logging.info(response.__dict__)
+		logging.info("GET request failed with status code: " + str(response.status_code))
 
 		return None
 
@@ -40,13 +41,13 @@ def write_json_file(data: dict, file_path: str = "miner_positions.json") -> None
     """Writes a dictionary to a JSON file."""
     with open(file_path, 'w') as file:
         json.dump(data, file)
-    print(f"Data successfully written to '{file_path}'.")
+    logging.info(f"Data successfully written to '{file_path}'.")
         
 def background_task():
 	while True:
 		# Simulate periodic data processing
 		new_data = {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}
-		print(f"Background task updated shared data: {new_data}")
+		logging.info(f"Background task updated shared data: {new_data}")
 		response = get_new_orders()
 		with data_lock:
 			write_json_file(response)

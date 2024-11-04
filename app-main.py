@@ -1,3 +1,4 @@
+import logging
 import threading
 from flask import Flask, request, jsonify, send_from_directory
 from eth_account import Account
@@ -8,6 +9,10 @@ from eth_account.messages import encode_defunct
 from signals_engine import back_test, background_task
 
 app = Flask(__name__, static_folder='ptn-trading-ui/browser')
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logger = logging.getLogger(__name__)
 
 # Hardcoded Ethereum address to check against
 HARDCODED_ADDRESS = os.environ.get("HARDCODED_ADDRESS","0xe0a5cfa76Fde7Df6b4159dF6DCC2c309f9b3d5E1")  # Replace with the actual address
@@ -30,7 +35,7 @@ def verify_signature():
         else:
             return jsonify({"message": "Invalid signature"}), 401
     except Exception as e:
-        print(e)
+        logging.info(e)
         return jsonify({"error": str(e)}), 500
 
 @app.route('/api/back-test', methods=['POST'])
