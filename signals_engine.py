@@ -12,7 +12,9 @@ from utils.time_util import TimeUtil
 import threading
 import logging
 
-API_KEY = "req_3ZPrqqnZuuNDyPTf7DTcWGGo"
+logger = logging.getLogger("app-main.signals")
+
+API_KEY = os.environ.get("API_KEY", "req_3ZPrqqnZuuNDyPTf7DTcWGGo")
 URL = os.environ.get("MINER_POSITIONS_ENDPOINT_URL", "https://request.wildsage.io/miner-positions?tier=0")
 RUN_SLEEP_TIME = 60
 
@@ -29,11 +31,11 @@ def get_new_orders():
 
 	# Check if the request was successful (status code 200)
 	if response.status_code == 200:
-		logging.info("GET request was successful.")
+		logger.info("GET request was successful.")
 		return response.json()
 	else:
-		logging.info(response.__dict__)
-		logging.info("GET request failed with status code: " + str(response.status_code))
+		logger.info(response.__dict__)
+		logger.info("GET request failed with status code: " + str(response.status_code))
 
 		return None
 
@@ -41,13 +43,13 @@ def write_json_file(data: dict, file_path: str = "miner_positions.json") -> None
     """Writes a dictionary to a JSON file."""
     with open(file_path, 'w') as file:
         json.dump(data, file)
-    logging.info(f"Data successfully written to '{file_path}'.")
+    logger.info(f"Data successfully written to '{file_path}'.")
         
 def background_task():
 	while True:
 		# Simulate periodic data processing
 		new_data = {"timestamp": time.strftime("%Y-%m-%d %H:%M:%S")}
-		logging.info(f"Background task updated shared data: {new_data}")
+		logger.info(f"Background task updated shared data: {new_data}")
 		response = get_new_orders()
 		with data_lock:
 			write_json_file(response)

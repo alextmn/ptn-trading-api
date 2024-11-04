@@ -1,4 +1,5 @@
 import logging
+import sys
 import threading
 from flask import Flask, request, jsonify, send_from_directory
 from eth_account import Account
@@ -8,11 +9,12 @@ from eth_account.messages import encode_defunct
 
 from signals_engine import back_test, background_task
 
-app = Flask(__name__, static_folder='ptn-trading-ui/browser')
-
-# Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-logger = logging.getLogger(__name__)
+app = Flask("app-main", static_folder='ptn-trading-ui/browser')
+handler = logging.StreamHandler(sys.stdout)
+handler.setFormatter(logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+#app.logger.addHandler(handler)
+app.logger.setLevel(logging.DEBUG)
 
 # Hardcoded Ethereum address to check against
 HARDCODED_ADDRESS = os.environ.get("HARDCODED_ADDRESS","0xe0a5cfa76Fde7Df6b4159dF6DCC2c309f9b3d5E1")  # Replace with the actual address
