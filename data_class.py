@@ -1,5 +1,8 @@
 from dataclasses import dataclass, field
-from typing import List, Optional
+from datetime import datetime
+import os
+from typing import List, Optional, Set
+import json
 
 @dataclass
 class PriceSource:
@@ -24,6 +27,12 @@ class Order:
     order_uuid: str
     price_sources: List[PriceSource]
     src: int
+    trade_pair: List[str] | None = None
+    muid: str | None = None
+    position_uuid: str | None  = None
+    position_type: str | None  = None
+    net_leverage: str | None  = None
+    rank: int | None  = None
 
 @dataclass
 class Position:
@@ -48,19 +57,55 @@ class AccountData:
     n_positions: int
     percentage_profitable: float
     tier: int
-    
-import json
-# Load JSON data from a file and parse it to the Root dataclass
+
+def parse_price_source(data: dict) -> PriceSource:
+    return PriceSource(**data)
+
+def parse_order(data: dict, p: Position) -> Order:
+    r = Order(**data)
+    r.price_sources = [parse_price_source(ps) for ps in data['price_sources']]
+    r.trade_pair = r.trade_pair or p.trade_pair
+    return r
+
+def parse_position(data: dict) -> Position:
+    r = Position(**data)
+    r.orders = [parse_order(order, r) for order in data['orders']]
+    return r
+
+def parse_account_data(data: dict) -> AccountData:
+    r = AccountData(**data)
+    r.positions = [parse_position(pos) for pos in data['positions']]
+    return r 
+
 def load_json_to_dataclass(file_path: str) -> List[AccountData]:
+    if not os.path.exists(file_path):
+        return []
+    
     with open(file_path, 'r') as file:
         json_data = json.load(file)
 
-    root_data = [ AccountData(**value) for _, value in json_data.items()]
+    root_data = [parse_account_data(account) for _, account in json_data.items()]
     return root_data
 
-file_path = 'miner_positions\\miner_positions_.json'  # Path to your JSON file
-#file_path = "1.json"
-parsed_data = load_json_to_dataclass(file_path)
 
-# Print parsed data as a dictionary for verification
-print(len(parsed_data))
+
+def miner_hotkeys_set(parsed_data) -> List[str]:
+    miner_hotkeys = [ [p.miner_hotkey for p in a.positions] for a in parsed_data]
+    return set(flatten(miner_hotkeys))
+
+def trade_pair_set(parsed_data) -> List[str]:
+    trade_pair = [ [p.trade_pair[0] for p in a.positions] for a in parsed_data]
+    return set(flatten(trade_pair))
+
+##################################
+def flatten(xss):
+    return [x for xs in xss for x in xs]
+
+def to_date(order:Order):
+    return datetime.fromtimestamp(order.processed_ms / 1000)
+
+def orders_by_pair(parsed_data, miner: str, trade_pairs_set: Set[str]) -> List[Order]:
+    positions = flatten([ a.positions for a in parsed_data if miner in set([p.miner_hotkey for p in a.positions])])
+    orders = flatten([p.orders for p in positions])
+    orders_filtered = [o for o in orders if (o.trade_pair)[0] in trade_pairs_set]
+    return orders_filtered

@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - FLASK_ENV=development
+      - API_KEY=req_3ZPrqqnZuuNDyPTf7DTcWGGo
+      - MINER_POSITIONS_ENDPOINT_URL=https://request.wildsage.io/miner-positions?tier=0
+      # metamask
+      - HARDCODED_ADDRESS=0xe0a5cfa76Fde7Df6b4159dF6DCC2c309f9b3d5E1

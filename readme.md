@@ -1,5 +1,11 @@
-#Taoshi Trading Bot Proposal
+#Taoshi Trading Bot
 
-## virtual env
-python -m venv venv
-.\venv\Scripts\activate
+## How to Run
+`docker-compose up -- build`
+
+## Configuration
+defined in `docker-compose.yml`
+
+## Virtual Env
+`python -m venv venv`
+`.\venv\Scripts\activate`

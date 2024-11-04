@@ -1,10 +1,13 @@
-from flask import Flask, request, jsonify
+import threading
+from flask import Flask, request, jsonify, send_from_directory
 from eth_account import Account
 import json
 import os
 from eth_account.messages import encode_defunct
 
-app = Flask(__name__)
+from signals_engine import back_test, background_task
+
+app = Flask(__name__, static_folder='ptn-trading-ui/browser')
 
 # Hardcoded Ethereum address to check against
 HARDCODED_ADDRESS = os.environ.get("HARDCODED_ADDRESS","0xe0a5cfa76Fde7Df6b4159dF6DCC2c309f9b3d5E1")  # Replace with the actual address
@@ -30,9 +33,30 @@ def verify_signature():
         print(e)
         return jsonify({"error": str(e)}), 500
 
+@app.route('/api/back-test', methods=['POST'])
+def api_back_test():
+    data = request.json
+    text = back_test(data.get('trade_pair'), data.get('miner'), 
+                     float(data.get('asset1')),
+                     float(data.get('asset2')),
+                     )
+    return jsonify({"text": text}), 200
+
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({"status": "UP"}), 200
 
+
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(os.path.join(app.static_folder, path)):
+        return send_from_directory(app.static_folder, path)
+    else:
+        return send_from_directory(app.static_folder, 'index.html')
+
 if __name__ == '__main__':
+    # Start background thread
+    background_thread = threading.Thread(target=background_task, daemon=True)
+    background_thread.start()
     app.run(host='0.0.0.0', port=8080, debug=True)
