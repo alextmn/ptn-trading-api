@@ -10,4 +10,4 @@ services:
       - API_KEY=req_3ZPrqqnZuuNDyPTf7DTcWGGo
       - MINER_POSITIONS_ENDPOINT_URL=https://request.wildsage.io/miner-positions?tier=0
       # metamask
-      - HARDCODED_ADDRESS=0xe0a5cfa76Fde7Df6b4159dF6DCC2c309f9b3d5E1
+      - HARDCODED_ADDRESS=0xe0a5cfa76Fde7Df6b4159dF6DCC2c309f9b3d5E1,0x1b53aBebFA996203feF4d5EBa3c79E7bf63177B0

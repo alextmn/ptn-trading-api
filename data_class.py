@@ -65,6 +65,7 @@ def parse_order(data: dict, p: Position) -> Order:
     r = Order(**data)
     r.price_sources = [parse_price_source(ps) for ps in data['price_sources']]
     r.trade_pair = r.trade_pair or p.trade_pair
+    r.muid = p.miner_hotkey
     return r
 
 def parse_position(data: dict) -> Position:
@@ -77,17 +78,17 @@ def parse_account_data(data: dict) -> AccountData:
     r.positions = [parse_position(pos) for pos in data['positions']]
     return r 
 
+def load_json_to_dataclass_from_dict(json_data: dict) -> List[AccountData]:
+    root_data = [parse_account_data(account) for _, account in json_data.items()]
+    return root_data
+
 def load_json_to_dataclass(file_path: str) -> List[AccountData]:
     if not os.path.exists(file_path):
         return []
     
     with open(file_path, 'r') as file:
         json_data = json.load(file)
-
-    root_data = [parse_account_data(account) for _, account in json_data.items()]
-    return root_data
-
-
+    return load_json_to_dataclass_from_dict(json_data)
 
 def miner_hotkeys_set(parsed_data) -> List[str]:
     miner_hotkeys = [ [p.miner_hotkey for p in a.positions] for a in parsed_data]
@@ -103,6 +104,11 @@ def flatten(xss):
 
 def to_date(order:Order):
     return datetime.fromtimestamp(order.processed_ms / 1000)
+
+def orders_all(parsed_data) -> List[Order]:
+    positions = flatten([ a.positions for a in parsed_data])
+    orders = flatten([p.orders for p in positions])
+    return orders
 
 def orders_by_pair(parsed_data, miner: str, trade_pairs_set: Set[str]) -> List[Order]:
     positions = flatten([ a.positions for a in parsed_data if miner in set([p.miner_hotkey for p in a.positions])])
