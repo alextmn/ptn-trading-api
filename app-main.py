@@ -1,3 +1,4 @@
+from functools import wraps
 import logging
 import sys
 import threading
@@ -26,26 +27,34 @@ HARDCODED_ADDRESS_LIST = [ a.lower() for a in os.environ.get("HARDCODED_ADDRESS"
                                     .split(",")]   # Replace with the actual address
 HARDCODED_MESSAGE= "Authentication Message"
 
+
+def token_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        try:
+            data = request.json
+            signature = data.get("signature","")
+
+            # Recover the address from the signature
+            recovered_address = Account.recover_message(
+                encode_defunct(text=HARDCODED_MESSAGE),
+                signature=signature
+            )
+
+            app.logger.info(f"verification: recovered_address: {recovered_address}")
+            if recovered_address.lower() not in HARDCODED_ADDRESS_LIST:
+                return jsonify({"message": "Invalid signature"}), 401
+        except Exception as e:
+            logging.info(e)
+            return jsonify({"error": str(e)}), 500
+
+        return f(*args, **kwargs)
+    return decorated
+
 @app.route('/api/verify-signature', methods=['POST'])
+@token_required
 def verify_signature():
-    try:
-        data = request.json
-        signature = data.get('signature')
-
-        # Recover the address from the signature
-        recovered_address = Account.recover_message(
-            encode_defunct(text=HARDCODED_MESSAGE),
-            signature=signature
-        )
-
-        app.logger.info(f"verification: recovered_address: {recovered_address}")
-        if recovered_address.lower() in HARDCODED_ADDRESS_LIST:
-            return jsonify({"message": "Signature is valid", "address": recovered_address}), 200
-        else:
-            return jsonify({"message": "Invalid signature"}), 401
-    except Exception as e:
-        logging.info(e)
-        return jsonify({"error": str(e)}), 500
+     return jsonify({"ok": True}), 200
 
 @app.route('/api/back-test', methods=['POST'])
 def api_back_test():
