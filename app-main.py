@@ -71,9 +71,12 @@ def api_back_test():
 @token_required
 def add_pair():
     data = request.json
-    text = add_user_exchange_list(data.get('trade_pair'), data.get('miner'), 
+    text = add_user_exchange_list(data.get('exchange'),
+                                  data.get('trade_pair'), data.get('miner'), 
                      float(data.get('asset1')),
                      float(data.get('asset2')),
+                     data.get('binance_api_key'),
+                     data.get('binance_secret_key'),
                      )
     return jsonify({"ok": True}), 200
 

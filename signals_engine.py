@@ -29,10 +29,12 @@ def get_last_line(text):
     lines = text.strip().splitlines()
     return lines[-1] if lines else ""
 
-def add_user_exchange_list(tarde_pair:str, miner:str,  asset1:float, asset2:float):
+def add_user_exchange_list(exchange:str, tarde_pair:str, miner:str,  
+						   asset1:float, asset2:float, binance_api_key: str, binance_secret_key: str):
   global user_exchange_list
   with data_lock:
-  	user_exchange_list.append(SimulatedExchange(miner, tarde_pair, asset1, asset2))
+	  if exchange == "simulated":
+  			user_exchange_list.append(SimulatedExchange(miner, tarde_pair, asset1, asset2))
 
 def delete_user_exchange_list(i: int):
 	global user_exchange_list

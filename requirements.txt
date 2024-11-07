@@ -1,3 +1,4 @@
 Flask
 eth-account
 requests
+python-binance
