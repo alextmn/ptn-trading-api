@@ -41,12 +41,20 @@ def delete_user_exchange_list(i: int):
 
 #############################
 
-def get_user_exchange_list() -> List[SimulatedExchange]:
+def get_user_exchange_list() -> dict:
   global user_exchange_list
   r = [{ "id":i, "trading_pair":e.trading_pair, 
 		"miner": e.miner, "last":get_last_line(e.trace()) } for i, e in  enumerate(user_exchange_list)]
   
   return r
+
+def get_user_exchange_log_by_id(id: int) -> dict:
+  global user_exchange_list
+  with data_lock:
+    it =  user_exchange_list[id]
+  return { "id":id, "trading_pair":it.trading_pair, 
+		"miner": it.miner, "trace":it.trace() }
+  
 
 def get_new_orders():
 		# Set the headers to specify that the content is in JSON format
