@@ -12,9 +12,7 @@ class BinanceExchange(Exchange):
         self.buffer.write("Date, Price, OrderType, Leverage, asset1/asset2, value, balance1/balance2\n")
 
     def balances(self):
-        """TODO: fix it: Retrieve balances for the trading pair's assets on Binance."""
-
-        asset1, asset2 = self.trading_pair.split("/")
+        asset1, asset2 = self.parse_trading_pair(self.trading_pair)
         balance_asset1 = float(self.client.get_asset_balance(asset=asset1)['free'])
         balance_asset2 = float(self.client.get_asset_balance(asset=asset2)['free'])
         return balance_asset1, balance_asset2

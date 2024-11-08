@@ -40,6 +40,18 @@ class Exchange:
     def trace(self) -> str:
         return self.buffer.getvalue()
     
+    def parse_trading_pair(self, pair: str):
+    # Define possible base currencies (common symbols for simplicity)
+        base_currencies = ["BTC", "ETH", "USD"]
+        
+        # Find and separate base and quote currencies
+        for base in base_currencies:
+            if pair.startswith(base):
+                quote = pair[len(base):]  # Remaining part is the quote currency
+                return base, quote
+        
+        raise KeyError(f"no pairs fo {pair}")
+    
 
 class SimulatedExchange(Exchange):
 

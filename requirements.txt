@@ -2,3 +2,4 @@ Flask
 eth-account
 requests
 python-binance
+hyperliquid-python-sdk
